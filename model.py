@@ -34,38 +34,9 @@ def errorRate(y, fc):
 	sum_err /= m
 	return sum_err
 
-def loopGradientDescent(alpha, y, x, cnt):
-	'''
-	loopGradientDescent()函数，用来循环梯度下降求最小的损失函数
-	输入:
-		 alpha学习率，可以考虑采用动态步长
-		 y样本值(m*1的一个数组，表示m个样本值)
-		 x样本(m*(n+1)的一个数组，表示m个样本，n+1个特征)
-		 cnt最大迭代次数
-	输出:模型theta((n+1)*1的一个数组，表示n+1个特征的值)
-	'''
-	n = np.shape(x)[1]  #获取特征数量n+1
-	m = np.shape(x)[0]  #获取样本数量m
-	theta = np.mat(np.ones((n,1)))  #初始化训练模型
-	for i in range(cnt):
-		#print(np.shape(theta),np.shape(x))
-		fc = forecast(theta,x)    #获取预测值矩阵(m*1)
-		#这里直接使用矩阵乘法一次性计算出来(y-fc)*x矩阵(n*1)
-		theta = theta + alpha*((x.T)*(y-fc)).T    #化简后的梯度下降
-		if i % 100 == 0:    #每100次看一下效果
-			errrate = errorRate(y,fc)
-			print("第"+str(i)+"次循环,误差率:"+str(errrate))
-			print("theta:")
-			print(theta)
-	return theta
 
 
-def loadData():
-    '''
-    loadData()从训练集中读出数据，并分类set0和set1
-    输入:fileName文件名
-    输出:两个m*n的矩阵，m个样本，n个特征
-    '''
+def TrainModel():
     data = dp.SampleBalance()
     data = np.array(data)
     choose = int(len(data) * 0.8)
@@ -85,10 +56,17 @@ def loadData():
     classfier.fit(train_x, train_y)
     result = classfier.score(test_x, test_y)
     y_pred = classfier.predict(test_x)
-    for i in range(len(test_y)):
-        print("real %d, pred %d " % (test_y[i], y_pred[i]))
     print('测试集打分', result)
     print('训练集打分', classfier.score(train_x,train_y))
+    return classfier
+''' 
+    count = 0
+    for i in range(len(test_y)):
+        if test_y[i] == y_pred[i]:
+            count += 1
+        print("real %d, pred %d " % (test_y[i], y_pred[i]))
+'''
+
 '''
 	# SVM
     classfier = NuSVC(kernel='rbf', gamma='scale', nu=0.01)
@@ -108,31 +86,12 @@ def loadData():
 '''
 
 
-    
+def TestResult(fileName):
 
-def saveModel(fileName,theta):
-        '''
-        saveModel()将模型保存到fileName的文件中。
-        输入:fileName保存的文件名吗，一个字符串
-             theta模型(n*1)的一个矩阵
-        '''
-        pass
-
-def loadModel(fileName):
-	'''
-        loadModel()函数，根据文件名提取出模型theta，并返回一个n*1的矩阵
-	输入:fileName文件名
-	输出:一个(m*n)的矩阵,作为模型
-		 一般来说，线性回归的theta模型是n*1的矩阵。
-		 我们训练后保存的是一个1*n的列表，因此需要读出来后转置一下
-	'''
 	pass
 
 
-#-----------下面用一个简单的样例测试一下是否输出成功---------------
+
 if __name__ == '__main__':
-    loadData()
-'''输出结果
-[[0.73105858]
- [0.26894142]]
-'''
+    model = TrainModel()
+    TestResult()
