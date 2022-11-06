@@ -163,7 +163,7 @@ def ConcatFile(ROOT_PATH, data_file, label_file, result_file):
 确定的特征：
 域名domain、标签label、解析次数rescount、间隔时间interval、解析的IP个数ipcount、解析出的IP网段变化幅度ipvar
 '''
-def ExtractData(ROOT_PATH, origin_label_file, ip_info_file, result_file):
+def ExtractData(ROOT_PATH, origin_label_file, ip_info_file, result_file, is_test):
     if os.path.isfile(ROOT_PATH + result_file):
         print("reuslt file ", ROOT_PATH+result_file, " has been exist, exit")
         return
@@ -182,7 +182,10 @@ def ExtractData(ROOT_PATH, origin_label_file, ip_info_file, result_file):
                 #domian
                 current.append(data_tmp.iloc[i, 3]) 
                 # label
-                current.append(data_tmp.iloc[i, 7]) 
+                if is_test:
+                    current.append(0)
+                else:
+                    current.append(data_tmp.iloc[i, 7]) 
                 # rescount
                 current.append(data_tmp.iloc[i, 0]) 
 
@@ -232,7 +235,7 @@ def SampleBalance(ROOT_PATH=r"data\fastflux_dataset",
             count[0] += 1
             continue
         choose = random.uniform(0, 1)
-        if choose < 0.025:
+        if choose < 0.35:
             count[1] += 1
             result.append(data.iloc[i, :])
     print("Finish sample, data count [flux: %d, no flux %d]" % (count[0], count[1]))
@@ -284,7 +287,7 @@ if __name__ == '__main__':
     # train_file2 = r"data\fastflux_dataset\demo.csv"
     ConcatFile(ROOT_PATH, train_file1, train_file2, result_file)
     # OriginLableFile(ROOT_PATH, test_pdns, train_file2, final_file)
-    ExtractData(ROOT_PATH, result_file, None, feature_file)
+    ExtractData(ROOT_PATH, result_file, None, feature_file, 0)
 
     OriginObjFile(ROOT_PATH, feature_file, feature_summary)
     FileStandard(ROOT_PATH, feature_summary, standard_file)

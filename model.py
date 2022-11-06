@@ -6,6 +6,7 @@
 
 import numpy as np
 import DataProc as dp
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.svm import SVC, NuSVC, LinearSVC
 from sklearn import tree
@@ -52,7 +53,7 @@ def TrainModel():
 
 	# 决策树
     classfier = tree.DecisionTreeClassifier(criterion='entropy', random_state=53, 
-				splitter='random',max_depth=4,min_samples_leaf=10,min_samples_split=10)
+				splitter='random',max_depth=5,min_samples_leaf=10,min_samples_split=10)
     classfier.fit(train_x, train_y)
     result = classfier.score(test_x, test_y)
     y_pred = classfier.predict(test_x)
@@ -86,12 +87,44 @@ def TrainModel():
 '''
 
 
-def TestResult(fileName):
+def TestLoadData():
+	# 获得测试集的标准化数据文件
+	TEST_ROOT = r"data\fastflux_dataset"
+	TEST_raw_data = r"\test\pdns.csv"
+	TEST_feature = r"\test\feature.csv"
+	TEST_summary = r"\test\summary.csv"
+	TEST_standard = r"\test\standard.csv"
+	dp.ExtractData(TEST_ROOT, TEST_raw_data, None, TEST_feature, 1)
+	dp.OriginObjFile(TEST_ROOT, TEST_feature, TEST_summary)
+	dp.FileStandard(TEST_ROOT, TEST_summary, TEST_standard)
+	testdata = pd.read_csv(TEST_ROOT+TEST_standard, sep=",", engine='python') 
+	return testdata.values
 
-	pass
+def OutputFile(data, test_y):
+	TEST_ROOT = r"data\fastflux_dataset"
+	TEST_result = r"\test\result.csv"
 
+	if data.shape[0] != len(test_y):
+		print("data len %d, test_y %d, error" % (data.shape[0], len(test_y)))
+		return
+
+	res = []
+	for i in range(len(test_y)):
+		current = [data[i][0], test_y[i]]
+		res.append(current)
+
+	tmp = pd.DataFrame(data=res, index=None)
+	tmp.to_csv(TEST_ROOT+TEST_result, mode='a', header=False, index=False)
+
+def TestResult(model):
+	data = TestLoadData()
+	# print(data)
+
+	test_x = data[:, 2:]
+	test_y = model.predict(test_x)
+	OutputFile(data, test_y)
 
 
 if __name__ == '__main__':
     model = TrainModel()
-    TestResult()
+    TestResult(model)
