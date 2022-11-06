@@ -35,9 +35,35 @@ def errorRate(y, fc):
 	sum_err /= m
 	return sum_err
 
+def DecisionTree(train_x, train_y, test_x, test_y):
+	classfier = tree.DecisionTreeClassifier(criterion='entropy', random_state=53, 
+				splitter='random',max_depth=5,min_samples_leaf=10,min_samples_split=10)
+	classfier.fit(train_x, train_y)
+	result = classfier.score(test_x, test_y)
+	y_pred = classfier.predict(test_x)
+	print('测试集打分', result)
+	print('训练集打分', classfier.score(train_x,train_y))
+	return classfier
 
+def SVM(train_x, train_y, test_x, test_y):
+	classfier = NuSVC(kernel='rbf', gamma='scale', nu=0.01)
+	classfier.fit(train_x, train_y)
+	y_pred = classfier.predict(test_x)
+	result = classfier.score(test_x, test_y)
+	print('测试集打分', result)
+	print('训练集打分', classfier.score(train_x,train_y))
+	return classfier
 
-def TrainModel():
+def Regression(train_x, train_y, test_x, test_y):
+	classfier = LogisticRegression(max_iter=10000)
+	classfier.fit(train_x, train_y)
+	y_pred = classfier.predict(test_x)
+	result = classfier.score(test_x, test_y)
+	print('测试集打分', result)
+	print('训练集打分', classfier.score(train_x,train_y))
+	return classfier
+
+def TrainModel(modelname):
     data = dp.SampleBalance()
     data = np.array(data)
     choose = int(len(data) * 0.8)
@@ -51,40 +77,13 @@ def TrainModel():
     test_y = data[choose:, 1]
     test_y = test_y.astype('int')
 
-	# 决策树
-    classfier = tree.DecisionTreeClassifier(criterion='entropy', random_state=53, 
-				splitter='random',max_depth=5,min_samples_leaf=10,min_samples_split=10)
-    classfier.fit(train_x, train_y)
-    result = classfier.score(test_x, test_y)
-    y_pred = classfier.predict(test_x)
-    print('测试集打分', result)
-    print('训练集打分', classfier.score(train_x,train_y))
-    return classfier
-''' 
-    count = 0
-    for i in range(len(test_y)):
-        if test_y[i] == y_pred[i]:
-            count += 1
-        print("real %d, pred %d " % (test_y[i], y_pred[i]))
-'''
+    if modelname == "DecisionTree":
+        return DecisionTree(train_x, train_y, test_x, test_y)
+    elif modelname == "SVM":
+        return SVM(train_x, train_y, test_x, test_y)
+    elif modelname == "Regression":
+        return Regression(train_x, train_y, test_x, test_y)
 
-'''
-	# SVM
-    classfier = NuSVC(kernel='rbf', gamma='scale', nu=0.01)
-    classfier.fit(train_x, train_y)
-    y_pred = classfier.predict(test_x)
-    for i in range(len(test_y)):
-        print("real %d, pred %d " % (test_y[i], y_pred[i]))
-    print(classfier.fit_status_)
-'''	
-'''
-	#逻辑回归，效果不好
-	classfier = LogisticRegression(max_iter=10000)
-    classfier.fit(train_x, train_y)
-    y_pred = classfier.predict(test_x)
-    for i in range(len(test_y)):
-        print("real %d, pred %d " % (test_y[i], y_pred[i]))
-'''
 
 
 def TestLoadData():
@@ -126,5 +125,5 @@ def TestResult(model):
 
 
 if __name__ == '__main__':
-    model = TrainModel()
+    model = TrainModel('SVM')
     TestResult(model)
